@@ -1,0 +1,29 @@
+<!--
+  Category 2: SIM swap and account takeover (ATO)
+  Rule IDs 100201-100202. Requires decoders/local_decoder.xml (fintech-auth-log).
+  Status: DRAFTED - test with wazuh-logtest using tests/sample-logs.md.
+-->
+
+<group name="nigerian_fintech,sim_swap,account_takeover,">
+
+  <!-- 100201: a new device was registered successfully -->
+  <rule id="100201" level="3">
+    <decoded_as>fintech-auth-log</decoded_as>
+    <field name="event_type">^device_registered$</field>
+    <field name="result">^success$</field>
+    <description>NG-ATO-001: New device $(device_id) registered for user $(user_id) from $(geo_location)</description>
+    <group>account_takeover,sim_swap,</group>
+  </rule>
+
+  <!-- 100202: repeated device registrations for the SAME user within 15 minutes -->
+  <rule id="100202" level="12" frequency="2" timeframe="900">
+    <if_matched_sid>100201</if_matched_sid>
+    <same_field>user_id</same_field>
+    <description>NG-ATO-001: Multiple device registrations for user $(user_id) within 15 minutes. Possible SIM swap / account takeover.</description>
+    <mitre>
+      <id>T1078</id>
+    </mitre>
+    <group>account_takeover,sim_swap,critical,</group>
+  </rule>
+
+</group>

@@ -1,0 +1,41 @@
+<!--
+  Custom decoders for the fintech log formats used by this rule pack.
+  Install to: /var/ossec/etc/decoders/local_decoder.xml on the Wazuh manager.
+
+  Expected log formats (one event per line):
+    fintech-auth     event_type=<s> result=<s> user_id=<s> device_id=<s> geo_location=<free text>
+    fintech-firewall src_ip=<ip> dst_ip=<ip>
+    fintech-web      src_ip=<ip> method=<s> http_uri=<path>
+
+  The regexes expect the fields in exactly this order.
+-->
+
+<decoder name="fintech-auth-log">
+  <prematch>^fintech-auth</prematch>
+</decoder>
+
+<decoder name="fintech-auth-log-child">
+  <parent>fintech-auth-log</parent>
+  <regex type="pcre2">event_type=(\S+) result=(\S+) user_id=(\S+) device_id=(\S+) geo_location=(.+)$</regex>
+  <order>event_type,result,user_id,device_id,geo_location</order>
+</decoder>
+
+<decoder name="fintech-firewall-log">
+  <prematch>^fintech-firewall</prematch>
+</decoder>
+
+<decoder name="fintech-firewall-log-child">
+  <parent>fintech-firewall-log</parent>
+  <regex type="pcre2">src_ip=(\S+) dst_ip=(\S+)</regex>
+  <order>src_ip,dst_ip</order>
+</decoder>
+
+<decoder name="fintech-web-log">
+  <prematch>^fintech-web</prematch>
+</decoder>
+
+<decoder name="fintech-web-log-child">
+  <parent>fintech-web-log</parent>
+  <regex type="pcre2">src_ip=(\S+) method=(\S+) http_uri=(\S+)</regex>
+  <order>web_src_ip,http_method,http_uri</order>
+</decoder>

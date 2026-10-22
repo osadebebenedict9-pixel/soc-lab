@@ -1,0 +1,65 @@
+<!--
+  Category 1: Business Email Compromise (BEC)
+  Rule IDs 100301-100306 (custom range 100000-120000).
+  Status: DRAFTED - not yet confirmed firing in the lab. See ../docs/ for each rule.
+-->
+
+<group name="bec,email_forwarding,active_directory,">
+
+  <!-- 100301: New email forwarding attribute set in Active Directory -->
+  <rule id="100301" level="12">
+    <field name="win.system.eventID">^5136$</field>
+    <!-- Wazuh lowercases the first letter of Windows eventdata field names. VERIFY in your own alert JSON. -->
+    <field name="win.eventdata.attributeLDAPDisplayName">forwardingAddress</field>
+    <description>BEC: Email forwarding attribute modified in Active Directory. Possible account takeover.</description>
+    <mitre>
+      <id>T1114.003</id>
+    </mitre>
+    <group>bec,email_forwarding,active_directory,</group>
+  </rule>
+
+</group>
+
+<group name="bec,dns,flutterwave,">
+
+  <!--
+    100302: DNS query (Sysmon Event 22) to a Flutterwave lookalike domain.
+    Matches names that START with "flutterwave" (also flutter-wave, flutter_wave) and are not
+    flutterwave.com / .ng / .co.za. Known limitation: misses prefixed names such as secure-flutterwave.com.
+    The parent rule ID below MUST be the default Sysmon "Event 22 / DNS query" rule on your manager.
+    Check with:  grep -rn "Event 22" /var/ossec/ruleset/rules/
+  -->
+  <rule id="100302" level="12">
+    <if_sid>61635</if_sid>
+    <field name="win.eventdata.queryName" type="pcre2">(?i)^flutter[-_]?wave[-_a-z0-9]*\.(?!com\.?$|ng\.?$|co\.za\.?$).+$</field>
+    <description>BEC: DNS query to Flutterwave lookalike domain: $(win.eventdata.queryName) by $(win.eventdata.image)</description>
+    <mitre>
+      <id>T1583.001</id>
+    </mitre>
+    <group>bec,dns,flutterwave,</group>
+  </rule>
+
+</group>
+
+<group name="bec,bruteforce,smtp_auth,">
+
+  <!-- 100305: SMTP auth failure (base rule). Event 1035 / "action" field is an ASSUMPTION - confirm against a real log. -->
+  <rule id="100305" level="3">
+    <field name="win.system.eventID">^1035$</field>
+    <field name="win.eventdata.action">failure</field>
+    <description>SMTP authentication failure detected</description>
+    <group>bec,bruteforce,smtp_auth,</group>
+  </rule>
+
+  <!-- 100306: 3+ SMTP auth failures from one source within 10 minutes -->
+  <rule id="100306" level="12" frequency="3" timeframe="600">
+    <if_matched_sid>100305</if_matched_sid>
+    <same_source_ip />
+    <description>BEC: Multiple SMTP authentication failures from the same source. Possible credential stuffing or brute force.</description>
+    <mitre>
+      <id>T1110</id>
+    </mitre>
+    <group>bec,bruteforce,smtp_auth,</group>
+  </rule>
+
+</group>

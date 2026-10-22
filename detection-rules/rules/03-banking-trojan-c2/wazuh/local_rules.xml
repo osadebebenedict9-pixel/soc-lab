@@ -1,0 +1,21 @@
+<!--
+  Category 3: Banking trojan command and control (C2)
+  Rule ID 100401. Requires decoders/local_decoder.xml (fintech-firewall-log).
+  Status: DRAFTED. The IP below is a LAB PLACEHOLDER, not a verified banking-trojan C2.
+  Replace it with an indicator from a cited feed (for example abuse.ch or AlienVault OTX), or move
+  indicators into a CDB list and use <list field="dst_ip" lookup="address_match_key">.
+-->
+
+<group name="nigerian_fintech,banking_trojan,c2,">
+
+  <rule id="100401" level="12">
+    <decoded_as>fintech-firewall-log</decoded_as>
+    <field name="dst_ip">^185\.220\.101\.45$</field>
+    <description>NG-C2-001: Internal host $(src_ip) connected to listed C2 indicator $(dst_ip). Possible active infection.</description>
+    <mitre>
+      <id>T1071</id>
+    </mitre>
+    <group>banking_trojan,c2,</group>
+  </rule>
+
+</group>

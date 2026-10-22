@@ -1,0 +1,19 @@
+<!--
+  Category 4: Cryptocurrency scam patterns
+  Rule ID 100501. Requires decoders/local_decoder.xml (fintech-web-log, added so this rule can fire).
+  Status: DRAFTED.
+-->
+
+<group name="nigerian_fintech,crypto_scam,">
+
+  <rule id="100501" level="10">
+    <decoded_as>fintech-web-log</decoded_as>
+    <field name="http_uri" type="pcre2">(?i)(claim-airdrop|double-your-bitcoin|free-matic)</field>
+    <description>NG-CRYPTO-001: Client $(web_src_ip) requested a URL matching a crypto-scam pattern: $(http_uri)</description>
+    <mitre>
+      <id>T1204.001</id>
+    </mitre>
+    <group>crypto_scam,phishing,</group>
+  </rule>
+
+</group>
